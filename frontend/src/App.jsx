@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // Force Vercel rebuild
 import { useAuth } from './context/AuthContext';
 import Scanner from './components/Scanner';
 import ResultsDisplay from './components/ResultsDisplay';
