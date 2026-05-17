@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vegetarian Food Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #1f2937;
+            --text-light: #4b5563;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            animation: fadeIn 1s ease;
+        }
+
+        /* API Key Section */
+        .api-key-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="password"], input[type="text"], textarea {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        input[type="password"]:focus, input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Input Modes */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .input-mode {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .input-mode.active {
+            display: block;
+        }
+
+        /* Image Upload */
+        .upload-area {
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 12px;
+            margin-top: 1rem;
+            display: none;
+            box-shadow: var(--shadow);
+        }
+
+        /* Text Input */
+        textarea {
+            width: 100%;
+            height: 150px;
+            resize: vertical;
+        }
+
+        /* Analyze Button */
+        .analyze-btn {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 16px;
+            font-size: 1.2rem;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        /* Results Section */
+        .results {
+            display: none;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.6s ease;
+        }
+
+        .verdict-banner {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 16px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .verdict-banner.vegan, .verdict-banner.vegetarian { background: var(--success); }
+        .verdict-banner.non-vegetarian { background: var(--danger); }
+        .verdict-banner.needs-checking { background: var(--warning); }
+
+        .reasoning {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .ingredients-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ingredient-tag {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid transparent;
+        }
+
+        .ingredient-tag.vegan, .ingredient-tag.vegetarian { border-left-color: var(--success); }
+        .ingredient-tag.egg, .ingredient-tag.dairy { border-left-color: var(--warning); }
+        .ingredient-tag.meat-fish, .ingredient-tag.insect { border-left-color: var(--danger); }
+        .ingredient-tag.needs-checking { border-left-color: var(--text-light); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 1.5rem; }
+            header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-leaf"></i> PureBite</h1>
+        <p>AI-Powered Vegetarian & Vegan Food Detector</p>
+    </header>
+
+    <div class="container">
+        <!-- API Key Config -->
+        <div class="api-key-section">
+            <h3><i class="fa-solid fa-key"></i> Configuration</h3>
+            <p style="font-size: 0.9rem; color: var(--text-light);">Enter your Anthropic API Key (stored securely in your browser).</p>
+            <div class="input-group">
+                <input type="password" id="api-key" placeholder="sk-ant-api03-...">
+                <button class="btn-primary" id="save-key-btn">Save Key</button>
+            </div>
+            <span id="key-status" style="font-size: 0.85rem; color: var(--success); display: none; margin-top: 5px;"><i class="fa-solid fa-check"></i> Key saved to localStorage</span>
+        </div>
+
+        <!-- Input Section -->
+        <div class="tabs">
+            <div class="tab active" data-target="image-mode"><i class="fa-solid fa-camera"></i> Scan Image</div>
+            <div class="tab" data-target="text-mode"><i class="fa-solid fa-align-left"></i> Enter Text</div>
+        </div>
+
+        <div id="image-mode" class="input-mode active">
+            <div class="upload-area" id="drop-zone">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <h3>Drag & Drop a food label</h3>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">or click to browse</p>
+                <input type="file" id="file-input" accept="image/*">
+                <img id="image-preview" class="image-preview" alt="Preview">
+            </div>
+        </div>
+
+        <div id="text-mode" class="input-mode">
+            <textarea id="ingredients-text" placeholder="Paste ingredients list here... (e.g. Sugar, Cocoa Mass, Milk Fat, Soy Lecithin)"></textarea>
+        </div>
+
+        <button class="btn-primary analyze-btn" id="analyze-btn"><i class="fa-solid fa-magnifying-glass"></i> Analyze Ingredients</button>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Claude is analyzing the ingredients...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results" id="results">
+            <div class="verdict-banner" id="verdict-banner">
+                <i id="verdict-icon" class="fa-solid"></i>
+                <span id="verdict-text">Vegetarian</span>
+            </div>
+            
+            <div class="reasoning">
+                <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-brain"></i> AI Analysis</h4>
+                <p id="reasoning-text">The product contains milk fat which is a dairy derivative, making it vegetarian but not vegan.</p>
+            </div>
+
+            <h4 style="margin-bottom: 1rem;"><i class="fa-solid fa-list-ul"></i> Ingredient Breakdown</h4>
+            <div class="ingredients-list" id="ingredients-list">
+                <!-- Tags generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let currentFile = null;
+        let base64Image = null;
+
+        // --- Elements ---
+        const apiKeyInput = document.getElementById('api-key');
+        const saveKeyBtn = document.getElementById('save-key-btn');
+        const keyStatus = document.getElementById('key-status');
+        
+        const tabs = document.querySelectorAll('.tab');
+        const modes = document.querySelectorAll('.input-mode');
+        
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const imagePreview = document.getElementById('image-preview');
+        const ingredientsText = document.getElementById('ingredients-text');
+        
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        
+        // Results elements
+        const verdictBanner = document.getElementById('verdict-banner');
+        const verdictIcon = document.getElementById('verdict-icon');
+        const verdictText = document.getElementById('verdict-text');
+        const reasoningText = document.getElementById('reasoning-text');
+        const ingredientsList = document.getElementById('ingredients-list');
+
+        // --- Initialization ---
+        const savedKey = localStorage.getItem('anthropic_api_key');
+        if (savedKey) {
+            apiKeyInput.value = savedKey;
+        }
+
+        // --- Event Listeners ---
+        // API Key Save
+        saveKeyBtn.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                localStorage.setItem('anthropic_api_key', key);
+                keyStatus.style.display = 'block';
+                setTimeout(() => keyStatus.style.display = 'none', 3000);
+            }
+        });
+
+        // Tabs Toggle
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                modes.forEach(m => m.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.target).classList.add('active');
+            });
+        });
+
+        // Drag & Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file.');
+                return;
+            }
+            currentFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                base64Image = e.target.result.split(',')[1];
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Analyze Actions
+        analyzeBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                alert('Please enter your Anthropic API Key first.');
+                return;
+            }
+
+            const activeTab = document.querySelector('.tab.active').dataset.target;
+            let messages = [];
+
+            if (activeTab === 'image-mode') {
+                if (!base64Image) {
+                    alert('Please upload an image first.');
+                    return;
+                }
+                messages = [{
+                    role: "user",
+                    content: [
+                        {
+                            type: "image",
+                            source: { type: "base64", media_type: currentFile.type, data: base64Image }
+                        },
+                        { type: "text", text: "Analyze the ingredients in this image." }
+                    ]
+                }];
+            } else {
+                const text = ingredientsText.value.trim();
+                if (!text) {
+                    alert('Please enter ingredients text.');
+                    return;
+                }
+                messages = [{ role: "user", content: text }];
+            }
+
+            await runAnalysis(apiKey, messages);
+        });
+
+        async function runAnalysis(apiKey, messages) {
+            // UI State
+            analyzeBtn.disabled = true;
+            loading.style.display = 'block';
+            results.style.display = 'none';
+
+            const systemPrompt = `Act as an expert food scientist. Read the image or text provided. Identify all ingredients and translate them to English if necessary. Classify each into one of these strict categories: "Vegan", "Vegetarian", "Egg", "Dairy", "Meat/Fish", "Insect", or "Needs Checking". 
+            
+            Return ONLY a valid JSON object (no markdown formatting, no code blocks) with the following structure:
+            {
+                "verdict": "Vegan" | "Vegetarian" | "Non-Vegetarian" | "Needs Checking",
+                "reasoning": "Brief 1-2 sentence explanation",
+                "ingredients": [
+                    {
+                        "name": "Ingredient name",
+                        "classification": "Vegan" | "Vegetarian" | "Egg" | "Dairy" | "Meat/Fish" | "Insect" | "Needs Checking"
+                    }
+                ]
+            }`;
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerously-allow-browser': 'true' // Required for client-side calls
+                    },
+                    body: JSON.stringify({
+                        model: "claude-3-5-sonnet-20241022",
+                        max_tokens: 1500,
+                        system: systemPrompt,
+                        messages: messages
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error?.message || 'API request failed');
+                }
+
+                const data = await response.json();
+                const jsonText = data.content[0].text;
+                
+                // Try to parse the JSON (handle potential markdown blocks if Claude disobeys)
+                let parsedData;
+                try {
+                    const cleanJson = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+                    parsedData = JSON.parse(cleanJson);
+                } catch (e) {
+                    throw new Error('Failed to parse AI response. Expected JSON.');
+                }
+
+                displayResults(parsedData);
+
+            } catch (error) {
+                alert('Analysis failed: ' + error.message);
+                console.error(error);
+            } finally {
+                analyzeBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            // Reset banner classes
+            verdictBanner.className = 'verdict-banner';
+            
+            // Set Banner
+            verdictText.textContent = data.verdict;
+            const vLower = data.verdict.toLowerCase().replace('/', '-');
+            
+            if (vLower === 'vegan') {
+                verdictBanner.classList.add('vegan');
+                verdictIcon.className = 'fa-solid fa-leaf';
+            } else if (vLower === 'vegetarian') {
+                verdictBanner.classList.add('vegetarian');
+                verdictIcon.className = 'fa-solid fa-seedling';
+            } else if (vLower === 'non-vegetarian') {
+                verdictBanner.classList.add('non-vegetarian');
+                verdictIcon.className = 'fa-solid fa-triangle-exclamation';
+            } else {
+                verdictBanner.classList.add('needs-checking');
+                verdictIcon.className = 'fa-solid fa-circle-question';
+            }
+
+            // Set Reasoning
+            reasoningText.textContent = data.reasoning;
+
+            // Render Ingredients
+            ingredientsList.innerHTML = '';
+            data.ingredients.forEach(ing => {
+                const tag = document.createElement('div');
+                const cLower = ing.classification.toLowerCase().replace('/', '-');
+                tag.className = `ingredient-tag ${cLower}`;
+                
+                let icon = '';
+                if (cLower === 'vegan') icon = '<i class="fa-solid fa-leaf" style="color: var(--success)"></i>';
+                else if (cLower === 'vegetarian') icon = '<i class="fa-solid fa-seedling" style="color: var(--success)"></i>';
+                else if (cLower === 'egg') icon = '<i class="fa-solid fa-egg" style="color: var(--warning)"></i>';
+                else if (cLower === 'dairy') icon = '<i class="fa-solid fa-cheese" style="color: var(--warning)"></i>';
+                else if (cLower === 'meat-fish') icon = '<i class="fa-solid fa-drumstick-bite" style="color: var(--danger)"></i>';
+                else if (cLower === 'insect') icon = '<i class="fa-solid fa-bug" style="color: var(--danger)"></i>';
+                else icon = '<i class="fa-solid fa-circle-question" style="color: var(--text-light)"></i>';
+
+                tag.innerHTML = `${icon} ${ing.name} <span style="font-size: 0.8rem; color: var(--text-light); margin-left: 4px;">(${ing.classification})</span>`;
+                ingredientsList.appendChild(tag);
+            });
+
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
