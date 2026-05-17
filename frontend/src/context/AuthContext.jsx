@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'sans-serif' }}>Connecting to Firebase... If this gets stuck, check your Firebase API keys!</div> : children}
     </AuthContext.Provider>
   );
 };
