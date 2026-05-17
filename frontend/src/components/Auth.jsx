@@ -59,7 +59,7 @@ const Auth = () => {
       </form>
 
       <div className="auth-switch" onClick={() => setIsLogin(!isLogin)}>
-        {isLogin ? "Don't have an account? <span>Sign Up</span>" : "Already have an account? <span>Log In</span>"}
+        {isLogin ? <>Don't have an account? <span>Sign Up</span></> : <>Already have an account? <span>Log In</span></>}
       </div>
     </div>
   );
